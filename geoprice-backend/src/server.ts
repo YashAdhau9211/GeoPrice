@@ -3,16 +3,12 @@ import { config, validateEnvironment } from './config/environment.js';
 import { connectDatabase, disconnectDatabase } from './config/database.js';
 import { logger } from './utils/logger.js';
 
-// Validate environment variables on startup
 validateEnvironment();
 
-// Start server function
 const startServer = async (): Promise<void> => {
   try {
-    // Connect to MongoDB
     await connectDatabase();
 
-    // Start Express server
     const server = app.listen(config.PORT, () => {
       logger.info(`Server started successfully`, {
         port: config.PORT,
@@ -24,18 +20,15 @@ const startServer = async (): Promise<void> => {
       console.log(`🔗 Base URL: ${config.BASE_URL}`);
     });
 
-    // Graceful shutdown handlers
     const gracefulShutdown = async (signal: string): Promise<void> => {
       logger.info(`${signal} received, starting graceful shutdown`);
       console.log(`\n${signal} received, shutting down gracefully...`);
 
-      // Close server to stop accepting new connections
       server.close(async () => {
         logger.info('HTTP server closed');
         console.log('✅ HTTP server closed');
 
         try {
-          // Disconnect from MongoDB
           await disconnectDatabase();
           logger.info('Graceful shutdown completed');
           console.log('✅ Graceful shutdown completed');
@@ -47,7 +40,6 @@ const startServer = async (): Promise<void> => {
         }
       });
 
-      // Force shutdown after 10 seconds if graceful shutdown fails
       setTimeout(() => {
         logger.error('Forced shutdown after timeout');
         console.error('❌ Forced shutdown after timeout');
@@ -55,18 +47,15 @@ const startServer = async (): Promise<void> => {
       }, 10000);
     };
 
-    // Listen for termination signals
     process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
-    // Handle uncaught exceptions
     process.on('uncaughtException', (error: Error) => {
       logger.error('Uncaught exception', error);
       console.error('❌ Uncaught exception:', error);
       gracefulShutdown('UNCAUGHT_EXCEPTION');
     });
 
-    // Handle unhandled promise rejections
     process.on('unhandledRejection', (reason: unknown) => {
       logger.error('Unhandled rejection', reason as Error);
       console.error('❌ Unhandled rejection:', reason);
@@ -79,5 +68,4 @@ const startServer = async (): Promise<void> => {
   }
 };
 
-// Start the server
 startServer();

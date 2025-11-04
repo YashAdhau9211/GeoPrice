@@ -18,6 +18,7 @@ pnpm-debug.log*
 *.swp
 *.swo
 *~
+.kiro/
 
 # OS
 .DS_Store

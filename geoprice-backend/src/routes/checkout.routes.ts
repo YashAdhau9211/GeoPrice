@@ -14,7 +14,8 @@ const productRepository = new ProductRepository();
 const orderRepository = new OrderRepository();
 const productService = new ProductService(productRepository);
 const currencyService = new CurrencyService();
-const paymentService = new PaymentService(stripeClient, orderRepository);
+const orderService = new OrderService(orderRepository);
+const paymentService = new PaymentService(stripeClient, orderService);
 const checkoutController = new CheckoutController(
   productService,
   paymentService,
@@ -24,11 +25,6 @@ const checkoutController = new CheckoutController(
 // Create router
 export const checkoutRouter = Router();
 
-/**
- * POST /api/create-checkout-session
- * Create a Stripe checkout session
- * Body: { productId: string, currency: string, country: string }
- */
 checkoutRouter.post(
   '/create-checkout-session',
   validateCheckoutRequest,

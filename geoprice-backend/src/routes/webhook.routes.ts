@@ -7,7 +7,8 @@ import { stripeClient } from '../config/stripe.js';
 
 // Initialize dependencies
 const orderRepository = new OrderRepository();
-const paymentService = new PaymentService(stripeClient, orderRepository);
+const orderService = new OrderService(orderRepository);
+const paymentService = new PaymentService(stripeClient, orderService);
 const webhookController = new WebhookController(paymentService);
 
 // Create router

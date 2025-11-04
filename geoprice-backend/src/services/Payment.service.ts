@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 import type { IProduct } from '../models/Product.model.js';
-import { OrderRepository } from '../repositories/Order.repository.js';
+import { OrderService } from './Order.service.js';
 import { ValidationError } from '../utils/errors.js';
 import { logger } from '../utils/logger.js';
 import { config } from '../config/environment.js';
@@ -8,7 +8,7 @@ import { config } from '../config/environment.js';
 export class PaymentService {
   constructor(
     private stripeClient: Stripe,
-    private orderRepo: OrderRepository
+    private orderService: OrderService
   ) {}
 
   /**
@@ -24,13 +24,11 @@ export class PaymentService {
     customerCountry: string
   ): Promise<{ sessionId: string; sessionUrl: string }> {
     try {
-      // Convert price to smallest currency unit (cents, paise, pence)
       const amountInSmallestUnit = this.convertToSmallestUnit(
         product.basePrice,
         currency
       );
 
-      // Create Stripe checkout session
       const session = await this.stripeClient.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: [
@@ -60,13 +58,11 @@ export class PaymentService {
         throw new Error('Stripe session creation failed - missing session ID or URL');
       }
 
-      // Create pending order in database
-      await this.orderRepo.create({
-        productId: product._id,
+      await this.orderService.createPendingOrder({
+        productId: product._id.toString(),
         amount: product.basePrice,
-        currency: currency as 'USD' | 'INR' | 'GBP',
+        currency: currency,
         stripeSessionId: session.id,
-        status: 'pending',
         customerCountry,
       });
 
@@ -128,23 +124,10 @@ export class PaymentService {
     try {
       const sessionId = session.id;
 
-      // Find the order by Stripe session ID
-      const order = await this.orderRepo.findByStripeSessionId(sessionId);
-
-      if (!order) {
-        logger.warn('Order not found for completed checkout session', {
-          sessionId,
-        });
-        return;
-      }
-
-      // Update order status to paid
-      await this.orderRepo.updateStatus(order._id.toString(), 'paid');
+      await this.orderService.markOrderAsPaid(sessionId);
 
       logger.info('Order marked as paid after successful checkout', {
-        orderId: order._id.toString(),
         sessionId,
-        productId: order.productId.toString(),
       });
     } catch (error) {
       logger.error('Failed to handle checkout completion', error as Error, {
@@ -154,16 +137,8 @@ export class PaymentService {
     }
   }
 
-  /**
-   * Convert amount to smallest currency unit
-   * @param amount - Amount in standard units
-   * @param currency - Currency code
-   * @returns Amount in smallest unit (e.g., cents)
-   */
+
   private convertToSmallestUnit(amount: number, currency: string): number {
-    // Most currencies use 2 decimal places (multiply by 100)
-    // Zero-decimal currencies like JPY, KRW would need special handling
-    // For this implementation, we support USD, INR, GBP which all use 2 decimals
     return Math.round(amount * 100);
   }
 }

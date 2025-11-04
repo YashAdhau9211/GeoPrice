@@ -19,7 +19,7 @@ export const config: EnvironmentConfig = {
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET || '',
   EXCHANGE_API_KEY: process.env.EXCHANGE_API_KEY || '',
   BASE_URL: process.env.BASE_URL || '',
-  FRONTEND_URL: process.env.FRONTEND_URL || '',
+  FRONTEND_URL: (process.env.FRONTEND_URL || '').replace(/^["']|["']$/g, ''),
   NODE_ENV: process.env.NODE_ENV || 'development',
 };
 

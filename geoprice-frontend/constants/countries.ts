@@ -32,9 +32,9 @@ export const DEFAULT_COUNTRY: CountryCode = 'US';
 
 // API endpoint paths
 export const API_ENDPOINTS = {
-  PRODUCTS: '/products',
-  PRICE: '/price',
-  CREATE_CHECKOUT: '/create-checkout-session',
+  PRODUCTS: '/api/products',
+  PRICE: '/api/price',
+  CREATE_CHECKOUT: '/api/create-checkout-session',
 } as const;
 
 /**
