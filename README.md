@@ -441,11 +441,6 @@ GeoPrice/
 ```
 
 
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## 🙏 Acknowledgments
 
 - [Next.js](https://nextjs.org/) for the amazing React framework
@@ -454,9 +449,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [MongoDB](https://www.mongodb.com/) for flexible data storage
 - [ExchangeRate-API](https://www.exchangerate-api.com/) for currency conversion
 
-## 📞 Support
 
-For support, please open an issue in the GitHub repository or contact the development team.
-
----
 
